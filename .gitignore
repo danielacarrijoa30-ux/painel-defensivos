@@ -1,0 +1,9 @@
+# arquivos gerados durante a atualização (ficam só no servidor do GitHub, nunca no repositório)
+rotina/node_modules/
+rotina/package*.json
+rotina/paginas/
+rotina/app_out/
+rotina/coleta*.json
+rotina/plantations.json
+rotina/_tmp.html
+rotina/painel.html

@@ -1,0 +1,90 @@
+name: Atualizar painel
+
+# Roda de hora em hora (6h10 às 19h10, horário de Brasília), e quando alguém toca em "Atualizar" no app.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '10 9-22 * * *'
+
+# Uma atualização por vez; se pedirem outra enquanto roda, ela espera (as repetidas se fundem numa só).
+concurrency:
+  group: atualizar-painel
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verificar se deve rodar
+        id: guard
+        env:
+          FARMBOX_TOKEN: ${{ secrets.FARMBOX_TOKEN }}
+        run: |
+          if [ -z "$FARMBOX_TOKEN" ]; then
+            echo "::warning::A chave do Farmbox (FARMBOX_TOKEN) ainda não foi cadastrada em Settings > Secrets. Nada foi feito."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # pedido pelo botão logo depois de uma atualização: ignora (evita abuso e gasto à toa)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -f versao.json ]; then
+            python3 -W ignore - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, datetime as d
+          b = json.load(open('versao.json'))['base']                       # horário de Brasília (UTC-3)
+          t = d.datetime.strptime(b, '%d/%m/%Y %H:%M') + d.timedelta(hours=3)
+          print('skip=true' if (d.datetime.utcnow() - t).total_seconds() < 300 else 'skip=false')
+          PY
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != 'true'
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.skip != 'true'
+        with:
+          node-version: '20'
+
+      - name: Instalar ferramentas
+        if: steps.guard.outputs.skip != 'true'
+        working-directory: rotina
+        run: |
+          pip install --quiet pillow
+          npm install --no-save --silent playwright
+          npx playwright install --with-deps chromium
+
+      - name: Buscar dados no Farmbox e montar o painel
+        if: steps.guard.outputs.skip != 'true'
+        working-directory: rotina
+        env:
+          FARMBOX_TOKEN: ${{ secrets.FARMBOX_TOKEN }}
+        run: |
+          python buscar_farmbox.py paginas plantations.json
+          python coletor_api.py paginas plantations.json coleta.json
+          python montar.py coleta.json template.html _tmp.html
+          node snap.js _tmp.html painel.html
+          python para_app.py painel.html app_out
+          ls -l app_out
+
+      - name: Publicar no app
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          cp rotina/app_out/index.html index.html
+          cp rotina/app_out/versao.json versao.json
+          git config user.name "painel-defensivos[bot]"
+          git config user.email "painel-defensivos-bot@users.noreply.github.com"
+          git add index.html versao.json
+          if git diff --cached --quiet; then
+            echo "Sem mudanças."
+          else
+            git commit -m "Atualização automática dos dados do Farmbox ($(TZ=America/Sao_Paulo date '+%d/%m %H:%M'))"
+            git pull --rebase --quiet
+            git push
+          fi
