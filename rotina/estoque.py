@@ -137,11 +137,10 @@ def analisa(aps, movs):
                 negativos = [d for d in DEPOSITOS if saldo_apos[d] < -TOL_QTD and (d in alocacao or d in usados[iid])]
                 if restante > TOL_QTD:
                     linha['situacao'] = 'NEGATIVO'
-                    todos = ', '.join(f'{DEPOSITOS[d]}: {fmt(S.get((iid, d, un_esp), 0.0), 3)}' for d in DEPOSITOS)
-                    bloqueios.append(f'{nome}: estoque insuficiente nos dois depósitos (faltam {fmt(restante, 3)} {un_esp}; saldos {todos})')
+                    bloqueios.append(f'{nome}: estoque insuficiente (faltam {fmt(restante, 3)} {un_esp})')
                 elif negativos:
                     linha['situacao'] = 'NEGATIVO'
-                    bloqueios.append(f'{nome}: saldo negativo no {", ".join(DEPOSITOS[d] for d in negativos)} ({fmt(min(saldo_apos[d] for d in negativos), 3)} {un_esp})')
+                    bloqueios.append(f'{nome}: saldo negativo ({fmt(min(saldo_apos[d] for d in negativos), 3)} {un_esp})')
                 else:
                     linha['situacao'] = 'REGULAR'
             insumos.append(linha)
