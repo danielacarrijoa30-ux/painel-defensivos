@@ -77,6 +77,16 @@ def faixa_alertas(h, caminho):
                       '<b>⚠ ESTOQUE: AP bloqueada, não pode ser finalizada</b>'
                       '<ul style="margin:6px 0 0 18px;padding:0">' + itens + '</ul>'
                       '<div style="margin-top:6px;font-size:12px">A rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque.</div></div>')
+    falta = [x for x in D.get('previsao', []) if x.get('situacao') == 'FALTARÁ']
+    if falta:
+        def br(v):
+            return ('{:,.1f}'.format(v)).replace(',', 'X').replace('.', ',').replace('X', '.')
+        itens = ''.join('<li><b>%s</b>%s: faltam %s %s para o que ainda vai ser aplicado</li>' % (
+            esc(x['insumo']), (' (' + esc(', '.join(x['aps'])) + ')') if x.get('aps') else '', br(-x['diferenca']), esc(x['unidade'])) for x in falta)
+        blocos.append('<div class="alertaest" style="background:#fff0e0;border:2px solid #d9701a;color:#7a3a05;border-radius:12px;padding:10px 12px;margin:0 0 10px;font-size:13.5px">'
+                      '<b>Atenção: o estoque não cobre as APs abertas</b>'
+                      '<ul style="margin:6px 0 0 18px;padding:0">' + itens + '</ul>'
+                      '<div style="margin-top:6px;font-size:12px">Previsão pelo estoque do Farmbox. Confira se há entradas ainda não registradas.</div></div>')
     poss = [a for a in aps if a['situacao'] == 'POSSÍVEL CONCLUSÃO']
     if poss:
         def ult(a):

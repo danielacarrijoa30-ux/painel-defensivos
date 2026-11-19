@@ -167,6 +167,7 @@ def previsao(aps, movs):
     """Para cada insumo das APs abertas: quanto falta aplicar (área ainda não aplicada x dose) x saldo total nos depósitos."""
     S, _ = saldos(movs)
     precisa = collections.defaultdict(float)
+    aps_do = collections.defaultdict(list)          # insumo -> APs que ainda vão usar
     nomes = {}
     for a in aps:
         if a.get('status') == 'finalized':
@@ -179,12 +180,14 @@ def previsao(aps, movs):
             if un and i.get('sought_dosage_value') is not None:
                 k = (i['input']['id'], un)
                 precisa[k] += restante * i['sought_dosage_value']
+                if restante > 0 and a['code'] not in aps_do[k]:
+                    aps_do[k].append(a['code'])
                 nomes[k] = i['input']['name']
     linhas = []
     for (iid, un), q in precisa.items():
         total = sum(S.get((iid, d, un), 0) for d in DEPOSITOS)
         linhas.append({'insumo': nomes[(iid, un)], 'unidade': un, 'a_aplicar': round(q, 2), 'saldo_total': round(total, 2),
-                       'situacao': 'FALTARÁ' if total < q else 'OK', 'diferenca': round(total - q, 2)})
+                       'situacao': 'FALTARÁ' if total < q else 'OK', 'diferenca': round(total - q, 2), 'aps': aps_do[(iid, un)]})
     return sorted(linhas, key=lambda x: x['diferenca'])
 
 
