@@ -54,13 +54,24 @@ for f in sorted(glob.glob(os.path.join(PASTA, '*'))):
     for a in carrega(f)['applications']:
         apps[a['code']] = a
 
+# De-para do tipo de atividade (só no painel; o Farmbox continua como está):
+# as APs de sulco de plantio estão no Farmbox como "Biológico + Inoculante" e aqui aparecem como "Sulco de Plantio".
+SULCO_APS = {'AP169', 'AP170', 'AP171', 'AP172', 'AP173', 'AP174', 'AP175'}
+def ativ_depara(a):
+    nome = (a.get('activity_type') or {}).get('name') or ''
+    obs = (a.get('observations') or '').strip().strip('"').lower()
+    if a.get('code') in SULCO_APS or obs.startswith('sulco de plantio'):
+        return 'Sulco de Plantio'
+    return nome
+
+
 aps, pp, csv = {}, {}, []
 for code, a in apps.items():
     nomes = {p['plantation']['id']: NOME(p['plantation']['name']) for p in a['plantations']}
     fin = a['status'] == 'finalized'
     ins = sorted(a.get('inputs') or [], key=lambda i: i.get('position') or 0)
     o = {'id': a['id'], 'code': code, 'status': a['status'], 'date': a['date'], 'end_date': a['end_date'],
-         'closed': a['closed_date'], 'ativ': (a.get('activity_type') or {}).get('name') or '',
+         'closed': a['closed_date'], 'ativ': ativ_depara(a),
          'tal': [{'t': NOME(p['plantation']['name']), 'area': AREA.get(p['plantation']['id'], p['plantation']['area']), 'sol': p['sought_area'],
                   'apl': p['applied_area'], 'cult': p['plantation'].get('culture_name') or ''} for p in a['plantations']],
          'ins': [{'n': i['input']['name'], 'tipo': i['input'].get('input_type_name') or '',
