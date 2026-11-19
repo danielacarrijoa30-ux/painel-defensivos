@@ -64,7 +64,7 @@ JS = r"""
 <style>.btatu.rodando{background:#e9dcb8;pointer-events:none}.hatu.rodando{opacity:.6;pointer-events:none}.atumsg{display:block;width:100%;font-size:12.5px;margin-top:6px;color:#F3E6C4}.atumsg b{color:#fff}.hact{flex-wrap:wrap}.hact .atumsg{color:var(--verde);font-size:12px}.hact .atumsg b{color:var(--verde)}</style>
 <script>
 (() => {
-  const TRIG = 'trig_014wkk4enNbAkBNoZaw5j4s4', SRV = 'Claude Code Remote';
+  const TRIG = 'trig_01PgWGXdKJdMrdEoagmEWHV3', SRV = 'Claude Code Remote';   // tarefa única = rotina completa (WhatsApp → Farmbox → painel e app)
   const bt = document.querySelector('.btatu'); if (!bt) return;
   let mcp = null, rodou = false;
   const bts = () => [...document.querySelectorAll('.btatu,.hatu')];
@@ -72,22 +72,22 @@ JS = r"""
   const msg = t => { const v = bts().find(e => e.offsetParent) || bt; let m = document.querySelector('.atumsg'); if (!m) { m = document.createElement('span'); m.className = 'atumsg'; v.parentNode.appendChild(m); } m.innerHTML = t; };
   const hh = d => d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
   (async () => { try { mcp = await window.claude?.use?.('mcp'); } catch (e) { mcp = null; }
-    if (mcp) { setTimeout(() => rot('⟳ Atualizar do Farmbox'), 2500); rot('⟳ Atualizar do Farmbox'); bt.title = 'Busca os dados novos no Farmbox e atualiza o link (leva uns 5 minutos)'; } })();
+    if (mcp) { setTimeout(() => rot('⟳ Rodar rotina completa'), 2500); rot('⟳ Rodar rotina completa'); bt.title = 'Lê as fichas do WhatsApp, lança as áreas no Farmbox, finaliza as APs e atualiza o painel e o app (leva uns 10 a 15 minutos)'; } })();
   bt.addEventListener('click', async ev => {
     if (!mcp || rodou) return;            // sem conector: o link só recarrega a página (comportamento normal)
     ev.preventDefault();
     bts().forEach(b => b.classList.add('rodando')); rot('⟳ Atualizando…');
     try {
       await mcp.callTool(SRV, 'fire_trigger', {trigger_id: TRIG, text: 'Disparado pelo botão Atualizar do painel em ' + new Date().toLocaleString('pt-BR')});
-      rodou = true; const fim = new Date(Date.now() + 5 * 60000);
-      msg(`Atualização iniciada às <b>${hh(new Date())}</b>: buscando os dados no Farmbox. Por volta das <b>${hh(fim)}</b> toque em <b>⟳ Recarregar</b> para ver o painel novo.`);
+      rodou = true; const fim = new Date(Date.now() + 12 * 60000);
+      msg(`Rotina completa iniciada às <b>${hh(new Date())}</b>: lendo as fichas do WhatsApp, lançando no Farmbox e atualizando o painel e o app. Por volta das <b>${hh(fim)}</b> toque em <b>⟳ Recarregar</b> para ver o painel novo.`);
       bts().forEach(b => b.classList.remove('rodando')); rot('⟳ Recarregar');
     } catch (e) {
-      bts().forEach(b => b.classList.remove('rodando')); rot('⟳ Atualizar do Farmbox');
+      bts().forEach(b => b.classList.remove('rodando')); rot('⟳ Rodar rotina completa');
       const c = e && e.code;
       msg(c === 'approval_required' || c === 'not_granted' ? 'Para atualizar pelo botão, permita o acesso ao "Claude Code Remote" quando o Claude pedir (menu Permissões do painel).'
         : c === 'needs_reauth' || c === 'server_not_connected' ? 'O conector "Claude Code Remote" não está conectado nesta conta. A página foi só recarregada.'
-        : c === 'tool_error' ? 'Não foi possível iniciar a atualização (só a conta da Daniela pode disparar). O painel se atualiza sozinho de hora em hora, das 6h às 19h.'
+        : c === 'tool_error' ? 'Não foi possível iniciar a rotina (só a conta da Daniela pode disparar). A rotina roda sozinha às 8h10, 11h52, 14h52 e 17h52.'
         : 'Não foi possível iniciar a atualização agora. Tente de novo em instantes.');
     }
   });
