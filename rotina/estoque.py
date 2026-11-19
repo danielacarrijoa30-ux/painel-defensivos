@@ -64,7 +64,8 @@ def analisa(aps, movs):
     for (iid, dep, un) in S:
         unidades[iid].add(un)
     resultado = []
-    for a in aps:
+    # APs da mais antiga para a mais nova; o que uma AP vai tirar do estoque já conta para a próxima (saldo corrente)
+    for a in sorted(aps, key=lambda x: (x.get('date') or '', x['code'])):
         if a.get('status') == 'finalized':
             continue
         sol = sum(p.get('sought_area') or 0 for p in a['plantations'])
@@ -131,6 +132,8 @@ def analisa(aps, movs):
                 linha['deposito'] = ' + '.join(f'{DEPOSITOS[d]} {fmt(q, 3)}' for d, q in alocacao.items()) or \
                     (' + '.join(DEPOSITOS[d] for d in usados[iid]) if usados[iid] else '-')
                 linha['saldo_apos'] = {DEPOSITOS[d]: round(v, 3) for d, v in saldo_apos.items()}
+                for d, q in alocacao.items():
+                    S[(iid, d, un_esp)] = S.get((iid, d, un_esp), 0.0) - q          # saldo corrente para as próximas APs
                 negativos = [d for d in DEPOSITOS if saldo_apos[d] < -TOL_QTD and (d in alocacao or d in usados[iid])]
                 if restante > TOL_QTD:
                     linha['situacao'] = 'NEGATIVO'
@@ -186,6 +189,29 @@ def previsao(aps, movs):
     return sorted(linhas, key=lambda x: x['diferenca'])
 
 
+def montar_alertas(res):
+    """Alertas para o grupo do WhatsApp (texto pronto + 'Ref' para não repetir). Vermelho: AP bloqueada por estoque.
+    Amarelo: possível conclusão (aplicada menor que a recomendada, sem FINAL). O id muda quando a situação muda."""
+    import hashlib
+    out = []
+    for r in res:
+        if r['situacao'] in ('BLOQUEADA (estoque)', 'ABERTA (estoque com problema)'):
+            ref = hashlib.md5((r['ap'] + '|v|' + '|'.join(r['bloqueios'])).encode('utf-8')).hexdigest()[:6]
+            linhas = ['🔴 ALERTA DE ESTOQUE · %s (%s)' % (r['ap'], r['atividade'] or ''), 'A AP NÃO pode ser finalizada:']
+            linhas += ['- ' + b for b in r['bloqueios']]
+            linhas.append('A rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque. Ref: ' + ref)
+            out.append({'id': ref, 'tipo': 'vermelho', 'ap': r['ap'], 'texto': '\n'.join(linhas)})
+        elif r['situacao'] == 'POSSÍVEL CONCLUSÃO':
+            ult = r.get('ultimo_lancamento') or ''
+            ref = hashlib.md5((r['ap'] + '|a|' + ult).encode('utf-8')).hexdigest()[:6]
+            data = (ult[8:10] + '/' + ult[5:7]) if ult else '-'
+            linhas = ['🟡 POSSÍVEL CONCLUSÃO · %s (%s)' % (r['ap'], r['atividade'] or ''),
+                      'Aplicada %s de %s ha (%s%%), último lançamento %s.' % (fmt(r['aplicada_ha'], 1), fmt(r['solicitada_ha'], 1), fmt(r['pct'], 1), data),
+                      'Se já terminou, escrevam FINAL no comentário do último lançamento no Farmbox. Ref: ' + ref]
+            out.append({'id': ref, 'tipo': 'amarelo', 'ap': r['ap'], 'texto': '\n'.join(linhas)})
+    return out
+
+
 def relatorio_md(res, agora, prev=None):
     L = [f'# Simulação da rotina de estoque, {agora}', '', '**Modo simulação: nada foi escrito no Farmbox.**', '']
     cont = collections.Counter(r['situacao'] for r in res)
@@ -227,6 +253,8 @@ if __name__ == '__main__':
     agora = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=-3)).strftime('%d/%m/%Y %H:%M')
     json.dump({'gerado': agora, 'simulacao': True, 'aps': res, 'previsao': prev}, open(saida, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     md = relatorio_md(res, agora, prev)
+    if len(sys.argv) > 5:                                   # alertas.json: usado pela tarefa que avisa o grupo do WhatsApp
+        json.dump({'gerado': agora, 'alertas': montar_alertas(res)}, open(sys.argv[5], 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     if len(sys.argv) > 4:
         open(sys.argv[4], 'w', encoding='utf-8').write(md)
     print(f'{len(aps)} APs lidas, {len(movs)} movimentações; {len(res)} APs abertas analisadas')

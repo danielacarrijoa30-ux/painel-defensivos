@@ -66,13 +66,13 @@ jobs:
         env:
           FARMBOX_TOKEN: ${{ secrets.FARMBOX_TOKEN }}
         run: |
-          rm -f estoque.json estoque.md
+          rm -f estoque.json estoque.md alertas.json
           python buscar_farmbox.py paginas plantations.json paginas_mov
           python coletor_api.py paginas plantations.json coleta.json
           python montar.py coleta.json template.html _tmp.html
           node snap.js _tmp.html painel.html
           # SIMULAÇÃO de estoque (só leitura): nada é escrito no Farmbox. Se falhar, o app é publicado do mesmo jeito, sem faixa de alerta.
-          python estoque.py paginas paginas_mov estoque.json estoque.md || { echo "::warning::A simulação de estoque não rodou; o app segue sem ela."; rm -f estoque.json estoque.md; }
+          python estoque.py paginas paginas_mov estoque.json estoque.md alertas.json || { echo "::warning::A simulação de estoque não rodou; o app segue sem ela."; rm -f estoque.json estoque.md alertas.json; }
           python para_app.py painel.html app_out
           ls -l app_out
 
@@ -95,7 +95,10 @@ jobs:
           cp rotina/app_out/versao.json versao.json
           git config user.name "painel-defensivos[bot]"
           git config user.email "painel-defensivos-bot@users.noreply.github.com"
+          # alertas.json (público, só texto de aviso): se a simulação de estoque não rodou, mantém o anterior
+          if [ -f rotina/alertas.json ]; then cp rotina/alertas.json alertas.json; fi
           git add index.html versao.json
+          if [ -f alertas.json ]; then git add alertas.json; fi
           if git diff --cached --quiet; then
             echo "Sem mudanças."
           else
