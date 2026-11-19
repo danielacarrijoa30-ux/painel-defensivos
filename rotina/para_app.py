@@ -4,7 +4,7 @@ Usa a tela inicial/menu guardados em para_artifact.py (mesma pasta). Depois é s
 import re, sys, os, base64, zlib, io, json, hashlib
 from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from para_artifact import aliviar
+from para_artifact import aliviar, faixa_alertas
 src, out = sys.argv[1], sys.argv[2]
 os.makedirs(out, exist_ok=True)
 h = open(src, encoding='utf-8').read()
@@ -15,6 +15,10 @@ EXTRA, RODAPE = dec('EXTRA_B64'), dec('RODAPE_B64')
 i = h.rfind('</main>'); j = h.find('<footer', i); k = h.find('</footer>', j)
 h = h[:i] + EXTRA + '\n</main>' + h[i+7:j] + RODAPE + h[k+9:]
 h = aliviar(h)   # ficha das APs guardada uma vez só (limite de 16 MB do Artifact / tamanho do app)
+try:
+    h = faixa_alertas(h, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'estoque.json'))   # faixa de estoque (se houver estoque.json)
+except Exception as e:
+    print('aviso: faixa de alertas não aplicada:', e)
 # base (data/hora dos dados)
 base = (re.search(r'id="base">([^<]*)<', h) or [None, ''])[1]
 ver = hashlib.md5((h+'chipfecha2').encode()).hexdigest()[:10]

@@ -7,3 +7,6 @@ rotina/coleta*.json
 rotina/plantations.json
 rotina/_tmp.html
 rotina/painel.html
+rotina/paginas_mov/
+rotina/estoque.json
+rotina/estoque.md

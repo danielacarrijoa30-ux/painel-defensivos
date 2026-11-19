@@ -93,3 +93,20 @@ print('Farmbox: %d APs em aberto, %d finalizadas, %d plantations' % (contagem['s
                                                                    sum(len(j['plantations']) for _, j in pl)))
 if total <= 50:
     sys.exit('Poucas APs (%d): algo está errado na busca; nada foi publicado.' % total)
+
+
+# Movimentações de estoque (3º argumento opcional): usadas só para calcular saldos. Falhar aqui NÃO impede a atualização do painel.
+if len(sys.argv) > 3:
+    PASTA_MOV = sys.argv[3]
+    try:
+        os.makedirs(PASTA_MOV, exist_ok=True)
+        for f in glob.glob(os.path.join(PASTA_MOV, '*')):
+            os.remove(f)
+        mv = todas('movimentations', 'farm_id=%s&view=minimal' % FARM, 'movimentations', 100)
+        for i, (txt, _) in enumerate(mv, 1):
+            open(os.path.join(PASTA_MOV, 'mov_%03d.json' % i), 'w', encoding='utf-8').write(txt)
+        print('Farmbox: %d movimentações de estoque' % sum(len(j['movimentations']) for _, j in mv))
+    except SystemExit as e:
+        for f in glob.glob(os.path.join(PASTA_MOV, '*')):
+            os.remove(f)                 # sem histórico completo não calcula saldo (evita alerta falso)
+        print('AVISO: movimentações de estoque não buscadas (%s); a simulação de estoque será pulada.' % e)
