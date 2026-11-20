@@ -1,4 +1,11 @@
 {
- "gerado": "19/11/2026 15:14",
- "alertas": []
+ "gerado": "19/11/2026 22:15",
+ "alertas": [
+  {
+   "id": "0c1557",
+   "tipo": "vermelho",
+   "ap": "AP199",
+   "texto": "🔴 ALERTA DE ESTOQUE · AP199 (1ª Pós-Emergente)\nA AP NÃO pode ser finalizada:\n- BORO 10: estoque insuficiente (faltam 10,078 l)\nA rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque. Ref: 0c1557"
+  }
+ ]
 }
