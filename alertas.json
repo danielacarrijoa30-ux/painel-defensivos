@@ -1,23 +1,4 @@
 {
- "gerado": "24/11/2026 08:16",
- "alertas": [
-  {
-   "id": "2d585d",
-   "tipo": "vermelho",
-   "ap": "AP197",
-   "texto": "🔴 ALERTA DE ESTOQUE · AP197 (1ª Pós-Emergente)\nA AP NÃO pode ser finalizada:\n- BORO 10: estoque insuficiente (faltam 18,142 l)\nA rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque. Ref: 2d585d"
-  },
-  {
-   "id": "1d2b7b",
-   "tipo": "amarelo",
-   "ap": "AP198",
-   "texto": "🟡 POSSÍVEL CONCLUSÃO · AP198 (1ª Pós-Emergente)\nAplicada 19,7 de 20,0 ha (98,7%), último lançamento 20/11.\nSe já terminou, escrevam FINAL no comentário do último lançamento no Farmbox. Ref: 1d2b7b"
-  },
-  {
-   "id": "0c1557",
-   "tipo": "vermelho",
-   "ap": "AP199",
-   "texto": "🔴 ALERTA DE ESTOQUE · AP199 (1ª Pós-Emergente)\nA AP NÃO pode ser finalizada:\n- BORO 10: estoque insuficiente (faltam 10,078 l)\nA rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque. Ref: 0c1557"
-  }
- ]
+ "gerado": "24/11/2026 11:56",
+ "alertas": []
 }
