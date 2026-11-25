@@ -26,7 +26,7 @@ main{max-width:820px;margin:0 auto;padding:14px 12px 40px}
 .pn{display:none}
 .tt{display:none}
 .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px}
-@media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:640px){.kpis{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}}
 .kpi{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:10px 12px;text-align:left;font:inherit;color:inherit;cursor:pointer;position:relative}
 .kpi b{display:block;font-size:24px;line-height:1.15}
 .kpi span{font-size:12px;color:var(--cinza)}
@@ -477,12 +477,17 @@ const progresso = (() => {
   const tFin = fin.flatMap(a => a.tal.filter(t => t.fim).map(t => ({...t, ap: a.ap})));
   const tPend = atr.flatMap(a => a.tal.filter(t => t.sit !== 'Finalizada').map(t => ({...t, ap: a.ap})));
   const areaApl = tFin.reduce((s, t) => s + t.apl, 0), areaPend = tPend.reduce((s, t) => s + t.rec, 0);
+  // Ajuste 25/11/2026: AP aberta com área parcial já lançada pelos operadores = em andamento
+  const temArea = a => a.tal.some(t => (t.apl || 0) > 0);
+  const emAnd = atr.filter(temArea), atrSemArea = atr.filter(a => !temArea(a));
   document.getElementById('resumo').innerHTML = progresso.html.replace('<!--KPIS-->', kpis([
-      {p: 'atr', v: atr.length, l: 'APs em aberto (atrasadas)', cls: 'ruim'},
+      {p: 'atr', v: atrSemArea.length, l: 'APs em aberto (atrasadas)', cls: 'ruim'},
+      {p: 'and', v: emAnd.length, l: 'APs em andamento', cls: 'am'},
       {p: 'fin', v: fin.length, l: 'APs concluídas', cls: 'ok'},
       {p: 'hap', v: fmt(areaApl, 0), l: 'ha aplicados', cls: 'ok'},
       {p: 'hpe', v: fmt(areaPend, 0), l: 'ha pendentes', cls: 'ruim'}], 'resumo'))
-    + `<div class="pn on" data-p="ger"></div>` + pn('atr', false, `APs atrasadas<small>mais antigas primeiro · toque na AP para ver todos os dados</small>`, atr.map(a => cardAP(a, 'atr')).join(''))
+    + `<div class="pn on" data-p="ger"></div>` + pn('atr', false, `APs atrasadas<small>sem área lançada · mais antigas primeiro · toque na AP para ver todos os dados</small>`, atrSemArea.map(a => cardAP(a, 'atr')).join('') || '<div class="vazio">Nenhuma AP atrasada sem área lançada.</div>')
+    + pn('and', false, `APs em andamento<small>área parcial já lançada pelos operadores · toque na AP para ver os talhões</small>`, emAnd.map(a => cardAP(a, 'atr')).join('') || '<div class="vazio">Nenhuma AP com área parcial lançada no momento.</div>')
     + pn('fin', false, `Histórico das APs concluídas<small>mais recentes primeiro · toque na AP para ver dados, produtos e frota</small>`, progresso.fechar +
         finAp.map(a => cardAP(a, 'fin')).join('') + (finSem.length ? `<h2>Finalizadas sem apontamento<small>sem data e sem área lançada no Farmbox</small></h2>${finSem.map(a => cardAP(a, 'fin')).join('')}` : ''))
     + pn('hap', false, `Área aplicada por talhão<small>${fmt(areaApl, 1)} ha · maiores primeiro</small>`,
