@@ -422,7 +422,7 @@ const progresso = (() => {
   const donut = `<svg viewBox="0 0 130 130" width="130" height="130" role="img" aria-label="Progresso das aplicações"><circle r="${R}" cx="65" cy="65" fill="none" stroke="#e7ebe2" stroke-width="20"/>${arcs}
     <text x="65" y="50" text-anchor="middle" font-size="20" font-weight="700" fill="var(--verde)">${fmt(pc(G.con, G.tot), 0)}%</text><text x="65" y="62" text-anchor="middle" font-size="9" fill="var(--cinza)">concluído</text><text x="65" y="76" text-anchor="middle" font-size="10.5" font-weight="700" fill="#333">${fmt(G.tot, 0)} ha</text><text x="65" y="90" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--verm)">${G.at + G.and > 0.5 ? 'faltam ' + fmt(G.at + G.and, 0) + ' ha' : 'tudo concluído'}</text></svg>`;
   const nAt = atr.filter(a => !a.tal.some(t => (t.apl || 0) > 0)).length, nAnd = atr.length - nAt;
-  const leg = [['c-con', 'Concluído', G.con, `${fin.length} APs finalizadas`], ['c-and', 'Em andamento', G.and, `já aplicado em ${nAnd} APs abertas`], ['c-atr', 'Em atraso', G.at, `falta aplicar em ${atr.length} APs abertas`]]
+  const leg = [['c-con', 'Concluído', G.con, `${fin.length} APs concluídas`], ['c-and', 'Em andamento', G.and, `já aplicado em ${nAnd} APs abertas`], ['c-atr', 'Em atraso', G.at, `falta aplicar em ${atr.length} APs abertas`]]
     .map(([c, n, v, s], i) => `<button class="pgrow" data-p="${['fin', 'pga', 'atrp'][i]}"><i class="${c}"></i><span>${n}</span><b>${fmt(pc(v, G.tot), 1)}%</b><small>${fmt(v, 1)} ha · ${s}</small></button>`).join('');
   const tipos = {};
   aps.forEach(a => (tipos[a.ativ] = tipos[a.ativ] || []).push(a));
@@ -458,7 +458,7 @@ const progresso = (() => {
       const z = `<circle r="${R}" cx="65" cy="65" fill="none" stroke="${cor}" stroke-width="20" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-o2).toFixed(2)}" transform="rotate(-90 65 65)"/>`; o2 += len; return z; }).join('');
     return `<svg viewBox="0 0 130 130" width="130" height="130"><circle r="${R}" cx="65" cy="65" fill="none" stroke="#e7ebe2" stroke-width="20"/>${ar}<text x="65" y="50" text-anchor="middle" font-size="20" font-weight="700" fill="var(--verde)">${fmt(pc(S.con, S.tot), 0)}%</text><text x="65" y="62" text-anchor="middle" font-size="9" fill="var(--cinza)">concluído</text><text x="65" y="76" text-anchor="middle" font-size="10.5" font-weight="700" fill="#333">${fmt(S.tot, 0)} ha</text><text x="65" y="90" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--verm)">${S.at + S.and > 0.5 ? 'faltam ' + fmt(S.at + S.and, 0) + ' ha' : 'tudo concluído'}</text></svg>`; };
   const legDe = (S, l) => { const ab = l.filter(a => a.sit !== 'Finalizada'), nA = ab.filter(a => !a.tal.some(t => (t.apl || 0) > 0)).length;
-    return [['c-con', 'Concluído', S.con, `${l.length - ab.length} APs finalizadas`], ['c-and', 'Em andamento', S.and, `já aplicado em ${ab.length - nA} APs abertas`], ['c-atr', 'Em atraso', S.at, `falta aplicar em ${ab.length} APs abertas`]]
+    return [['c-con', 'Concluído', S.con, `${l.length - ab.length} APs concluídas`], ['c-and', 'Em andamento', S.and, `já aplicado em ${ab.length - nA} APs abertas`], ['c-atr', 'Em atraso', S.at, `falta aplicar em ${ab.length} APs abertas`]]
       .map(([c, n, v, sx], i) => `<button class="pgrow" data-p="${['fin', 'pga', 'atrp'][i]}"><i class="${c}"></i><span>${n}</span><b>${fmt(pc(v, S.tot), 1)}%</b><small>${fmt(v, 1)} ha · ${sx}</small></button>`).join(''); };
   const topoTipos = ordT.map(([n, S, l], i) => `<div class="dnv dnv-pt${i}"><div class="dnt">${esc(n)} · ${fmt(S.tot, 0)} ha <small>· toque em "Visão geral" para voltar</small></div><div class="pgtop">${donutDe(S)}<div class="pgleg">${legDe(S, l)}</div></div></div>`).join('');
   const varSt = [['fin', 'con', 'c-con', 'concluído'], ['pga', 'and', 'c-and', 'em andamento'], ['atrp', 'at', 'c-atr', 'em atraso'], ['abe', 'pend', 'c-atr', 'pendente (andamento + atraso)']].map(([p, k, c, nm]) => {
@@ -469,7 +469,7 @@ const progresso = (() => {
     <div class="dnv dnv-all"><div class="pgtop">${donut}<div class="pgleg">${leg}</div></div></div>${topoTipos}
     <!--KPIS-->
     <div class="pgb"><div class="ptv ptv-all"><h2 style="margin:12px 0 0">Por tipo de aplicação</h2>${porTipo}</div>${varSt}<div class="chips pgvolta" style="margin-top:8px"><button class="chip" data-p="ger">⟲ Voltar à visão geral</button></div></div>
-    <div class="dica" style="margin-top:8px">Concluído = área das APs finalizadas. Em andamento = área já aplicada em APs ainda abertas. Em atraso = área que falta aplicar nas APs abertas. Toque numa linha ou numa barra para ver os talhões.</div></div>`};
+    <div class="dica" style="margin-top:8px">Concluído = área das APs finalizadas no Farmbox e das APs com a área total já lançada pelos operadores (aguardando finalização). Em andamento = área já aplicada em APs ainda abertas. Em atraso = área que falta aplicar nas APs abertas. Toque numa linha ou numa barra para ver os talhões.</div></div>`};
 })();
 
 /* ---------- Resumo ---------- */
@@ -479,11 +479,11 @@ const progresso = (() => {
   const areaApl = tFin.reduce((s, t) => s + t.apl, 0), areaPend = tPend.reduce((s, t) => s + t.rec, 0);
   document.getElementById('resumo').innerHTML = progresso.html.replace('<!--KPIS-->', kpis([
       {p: 'atr', v: atr.length, l: 'APs em aberto (atrasadas)', cls: 'ruim'},
-      {p: 'fin', v: fin.length, l: 'APs finalizadas', cls: 'ok'},
+      {p: 'fin', v: fin.length, l: 'APs concluídas', cls: 'ok'},
       {p: 'hap', v: fmt(areaApl, 0), l: 'ha aplicados', cls: 'ok'},
       {p: 'hpe', v: fmt(areaPend, 0), l: 'ha pendentes', cls: 'ruim'}], 'resumo'))
     + `<div class="pn on" data-p="ger"></div>` + pn('atr', false, `APs atrasadas<small>mais antigas primeiro · toque na AP para ver todos os dados</small>`, atr.map(a => cardAP(a, 'atr')).join(''))
-    + pn('fin', false, `Histórico das APs finalizadas<small>mais recentes primeiro · toque na AP para ver dados, produtos e frota</small>`, progresso.fechar +
+    + pn('fin', false, `Histórico das APs concluídas<small>mais recentes primeiro · toque na AP para ver dados, produtos e frota</small>`, progresso.fechar +
         finAp.map(a => cardAP(a, 'fin')).join('') + (finSem.length ? `<h2>Finalizadas sem apontamento<small>sem data e sem área lançada no Farmbox</small></h2>${finSem.map(a => cardAP(a, 'fin')).join('')}` : ''))
     + pn('hap', false, `Área aplicada por talhão<small>${fmt(areaApl, 1)} ha · maiores primeiro</small>`,
         porTalhao(tFin, 'apl').map(([t, o]) => `<details class="tal"><summary><b>${esc(t)}${estTal(t)}</b><span class="r"><b>${fmt(o.ha, 2)} ha</b></span><span class="x">${[...o.aps].join(', ')} · última em ${dBR(o.ult)}</span></summary><div class="det2">${talInfo(t, [...o.aps])}</div></details>`).join(''))

@@ -92,6 +92,13 @@ for code, a in C['aps'].items():
     if ativ in EXCL_ATIV: continue
     if any('CANA' in (t['t'] or '').upper() for t in a['tal']): continue
     fin = a.get('status') == 'finalized'
+    # Ajuste 25/11/2026 (pedido da Daniela): AP em aberto com a área total já lançada pelos operadores
+    # (>= 99,5% da área solicitada) aparece como CONCLUÍDA no painel, mesmo antes da movimentação de
+    # estoque e da finalização da AP no Farmbox.
+    sol_t = sum(t.get('sol') or 0 for t in a['tal']); apl_t = sum(t.get('apl') or 0 for t in a['tal'])
+    concl_area = (not fin) and sol_t > 0 and apl_t >= 0.995 * sol_t
+    fim_prog = max([x['d'] for x in (a.get('prog') or []) if x.get('d')] or [None]) if concl_area else None
+    fin = fin or concl_area
     dsol = a.get('date')
     tal = []
     for t in a['tal']:
@@ -99,6 +106,8 @@ for code, a in C['aps'].items():
         dias = None
         if not fin and dsol:
             dias = max(0, (HOJE - dt.date.fromisoformat(dsol)).days)
+        if concl_area and not fim: fim = fim_prog
+        if concl_area and not ini: ini = fim_prog
         tal.append({'t': nm, 'sit': 'Finalizada' if fin else 'Atrasada', 'ini': ini, 'fim': fim if fin else None,
                     'rec': round(t.get('sol') or 0, 2), 'solc': round(t.get('sol') or 0, 2),
                     'apl': round(t.get('apl') or 0, 2), 'dias': dias})
@@ -135,7 +144,7 @@ for code, a in C['aps'].items():
     det['prods'] = prods
     aps.append({'ap': code, 'n': int(code[2:]), 'ativ': ativ, 'dsol': dsol, 'tal': tal,
                 'prod': '; '.join(pr['nome'] for pr in prods), 'eq': det['equip'] or '', 'id': a['id'],
-                'sit': 'Finalizada' if fin else 'Atrasada', 'det': det})
+                'sit': 'Finalizada' if fin else 'Atrasada', 'concl_area': concl_area, 'det': det})
 aps.sort(key=lambda a: -a['n'])
 # ---------- estádio estimado pela data de plantio (Operações > Semeadura + ciclo da variedade) ----------
 FAZ_ID = '14106'   # Bom Jesus no cadastro de variedades do Farmbox
@@ -192,4 +201,4 @@ for k, a in C['aps'].items():
 D = {'gerado': agora.strftime('%d/%m/%Y'), 'base': agora.strftime('%d/%m/%Y %H:%M'), 'hoje': HOJE.isoformat(),
      'aps': aps, 'apont': apont, 'est': est, 'prod': prodapl, 'apab': apab}
 open(OUT, 'w', encoding='utf-8').write(open(TPL, encoding='utf-8').read().replace('__DADOS__', json.dumps(D, ensure_ascii=False)))
-print(f"{len(aps)} APs ({sum(a['sit']=='Finalizada' for a in aps)} finalizadas), {len(apont)} apontamentos, base {D['base']}")
+print(f"{len(aps)} APs ({sum(a['sit']=='Finalizada' for a in aps)} concluídas, sendo {sum(1 for a in aps if a.get('concl_area'))} com área completa ainda não finalizadas no Farmbox: {', '.join(a['ap'] for a in aps if a.get('concl_area')) or '-'}), {len(apont)} apontamentos, base {D['base']}")
