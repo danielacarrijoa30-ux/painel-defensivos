@@ -1,4 +1,11 @@
 {
- "gerado": "24/11/2026 17:08",
- "alertas": []
+ "gerado": "25/11/2026 00:33",
+ "alertas": [
+  {
+   "id": "9076cd",
+   "tipo": "vermelho",
+   "ap": "AP202",
+   "texto": "🔴 ALERTA DE ESTOQUE · AP202 (1ª Pós-Emergente)\nA AP NÃO pode ser finalizada:\n- KENOX: estoque insuficiente (faltam 66,290 kg)\nA rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque. Ref: 9076cd"
+  }
+ ]
 }
