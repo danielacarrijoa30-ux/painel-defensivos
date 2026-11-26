@@ -1,17 +1,29 @@
 {
- "gerado": "25/11/2026 14:28",
+ "gerado": "26/11/2026 14:58",
  "alertas": [
   {
-   "id": "9076cd",
-   "tipo": "vermelho",
-   "ap": "AP202",
-   "texto": "🔴 ALERTA DE ESTOQUE · AP202 (1ª Pós-Emergente)\nA AP NÃO pode ser finalizada:\n- KENOX: estoque insuficiente (faltam 66,290 kg)\nA rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque. Ref: 9076cd"
+   "id": "b6208c",
+   "tipo": "amarelo",
+   "ap": "AP213",
+   "texto": "🟡 POSSÍVEL CONCLUSÃO · AP213 (1ª Fungicida+Inseticida)\nAplicada 40,4 de 95,7 ha (42,2%), último lançamento 21/11.\nSe já terminou, escrevam FINAL no comentário do último lançamento no Farmbox. Ref: b6208c"
   },
   {
-   "id": "4dc2fd",
+   "id": "6e56dc",
+   "tipo": "amarelo",
+   "ap": "AP214",
+   "texto": "🟡 POSSÍVEL CONCLUSÃO · AP214 (1ª Pós-Emergente)\nAplicada 14,1 de 133,7 ha (10,5%), último lançamento 21/11.\nSe já terminou, escrevam FINAL no comentário do último lançamento no Farmbox. Ref: 6e56dc"
+  },
+  {
+   "id": "7da790",
+   "tipo": "amarelo",
+   "ap": "AP215",
+   "texto": "🟡 POSSÍVEL CONCLUSÃO · AP215 (2ª Pós-Emergente)\nAplicada 17,5 de 141,3 ha (12,4%), último lançamento 20/11.\nSe já terminou, escrevam FINAL no comentário do último lançamento no Farmbox. Ref: 7da790"
+  },
+  {
+   "id": "02d4d6",
    "tipo": "vermelho",
-   "ap": "AP205",
-   "texto": "🔴 ALERTA DE ESTOQUE · AP205 (1ª Fungicida+Inseticida)\nA AP NÃO pode ser finalizada:\n- BORO 10: estoque insuficiente (faltam 24,320 l)\nA rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque. Ref: 4dc2fd"
+   "ap": "AP203",
+   "texto": "🔴 ALERTA DE ESTOQUE · AP203 (3° Biológico)\nA AP NÃO pode ser finalizada:\n- METHARIZIUM: estoque insuficiente (faltam 545,888 l)\nA rotina nunca finaliza AP com saldo negativo ou não verificável e não ajusta estoque. Ref: 02d4d6"
   }
  ]
 }
